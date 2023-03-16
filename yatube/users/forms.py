@@ -15,12 +15,10 @@ class CreationForm(UserCreationForm):
 
 
 class ChangeForm(PasswordChangeForm):
-    def passwordchange(self, user):
-        model = User
-        fields = ('current password', 'new_password', 'new_password_repeated')
+    def passwordchange(self):
+        pass
 
 
 class ResetForm(PasswordResetForm):
-    def password_reset(self, user):
-        model = User
-        fields = ('new_password', 'new_password_confirm')
+    def password_reset(self):
+        pass

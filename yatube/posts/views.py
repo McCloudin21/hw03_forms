@@ -6,9 +6,12 @@ from .models import Post, Group, User
 from .forms import PostForm
 
 
+POSTS_ON_PAGE = 10
+
+
 def index(request):
-    post_list = Post.objects.all()
-    paginator = Paginator(post_list, 10)
+    post_list = Post.objects.select_related('author').all()
+    paginator = Paginator(post_list, POSTS_ON_PAGE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     context = {
@@ -20,14 +23,12 @@ def index(request):
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
     posts_list = Post.objects.all().order_by('-pub_date')
-    paginator = Paginator(posts_list, 10)
+    paginator = Paginator(posts_list, POSTS_ON_PAGE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    title = Group.description
     context = {
         'group': group,
         'posts': posts_list,
-        'title': title,
         'page_obj': page_obj,
     }
     return render(request, 'posts/group_list.html', context)
@@ -52,22 +53,18 @@ def profile(request, username):
 
 
 def post_detail(request, post_id):
-    author = get_object_or_404(Post, id=post_id)
     post = Post.objects.get(pk=post_id)
     posts_count = Post.objects.all().count()
-    title = f'Пост {author}'
     context = {
-        'author': author,
         'post': post,
         'posts_count': posts_count,
-        'title': title,
     }
     return render(request, 'posts/post_detail.html', context)
 
 
 @login_required
 def post_create(request):
-    form = PostForm(request.POST or None, files=request.FILES or None)
+    form = PostForm(request.POST or None)
     if form.is_valid():
         form.instance.author = request.user
         form.save()
@@ -79,7 +76,9 @@ def post_create(request):
 def post_edit(request, post_id):
     is_form_edit = True
     post = get_object_or_404(Post, id=post_id)
-    if post.author == request.user:
+    if post.author != request.user:
+        return redirect('posts:post_detail')
+    else:
         form = PostForm(request.POST or None,
                         files=request.FILES or None, instance=post)
         if form.is_valid():
@@ -91,5 +90,3 @@ def post_edit(request, post_id):
                       context={'form': form,
                                'is_form_edit': is_form_edit,
                                'post': post})
-    else:
-        return redirect('posts:post_detail')

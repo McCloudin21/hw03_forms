@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content_title %}Добавление новой записи{% endblock %}
+{% block content %}
+{% load user_filters %}
+<div class="container py-5"> 
+    <div class="row justify-content-center">
+      <div class="col-md-8 p-5">
+        <div class="card">
+          <div class="card-header">
+            Новый пост
+          </div>
+          <div class="card-body">
+            {% if is_form_edit %}
+              <form action="{% url 'posts:post_edit' post.id %}" method="post">
+            {% else %}
+              <form action="{% url 'posts:post_create' %}" method="post">
+            {% endif %}
+            {% for key, value in form.errors.items %}
+              <div class="alert alert-danger" role="alert">
+               {{ value|escape}}
+              </div>
+            {% endfor %}
+            {% csrf_token %}
+              {% for field in form %}
+              <div class="form-group row my-3 p-3">
+              {{ field|addclass:'form-control' }}
+              {{ field.label }}
+              </div>
+              {% endfor %}
+            <div class="d-flex justify-content-end">  
+              <button type="submit" class="btn btn-primary" >
+                {% if is_form_edit %}
+                  Сохранить изменения
+                {% else %}
+                  Создать пост
+                {% endif %}
+              </button>
+            </div>
+            </form>
+          </div> <!-- card body -->
+        </div> <!-- card -->
+      </div> <!-- col -->
+    </div> <!-- row -->
+</div>
+{% endblock %}

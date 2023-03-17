@@ -1,20 +1,18 @@
 {% extends "base.html" %}
-{% block content_title %}Добавление новой записи{% endblock %}
+{% block content_title %}{{ title }}{% endblock %}
 {% block content %}
 {% load user_filters %}
 <div class="container py-5"> 
     <div class="row justify-content-center">
       <div class="col-md-8 p-5">
         <div class="card">
-          {% if is_form_edit %}
-            <div class="card-header d-flex justify-content-center">
+          <div class="card-header d-flex justify-content-center">
+            {% if is_form_edit %}
               Редактирование
-            </div>
-          {% else %}
-            <div class="card-header d-flex justify-content-center">
+            {% else %}
               Новый пост
-            </div>
-          {% endif %}
+            {% endif %}
+          </div>
           <div class="card-body">
             {% if is_form_edit %}
               <form action="{% url 'posts:post_edit' post.id %}" method="post">

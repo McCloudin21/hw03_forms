@@ -22,7 +22,7 @@ def index(request):
 
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
-    posts_list = Post.objects.all().order_by('-pub_date')
+    posts_list = Post.objects.all()
     paginator = Paginator(posts_list, POSTS_ON_PAGE)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -53,7 +53,7 @@ def profile(request, username):
 
 
 def post_detail(request, post_id):
-    post = Post.objects.get(pk=post_id)
+    post = get_object_or_404(Post, pk=post_id)
     posts_count = Post.objects.all().count()
     context = {
         'post': post,
@@ -65,27 +65,30 @@ def post_detail(request, post_id):
 @login_required
 def post_create(request):
     form = PostForm(request.POST or None)
+    title = f'Новый пост'
     if form.is_valid():
         form.instance.author = request.user
         form.save()
         return redirect('posts:profile', request.user.username)
-    return render(request, 'posts/post_create.html', {'form': form})
+    return render(request, 'posts/post_create.html', context={'form': form,
+                                                              'title': title})
 
 
 @login_required
 def post_edit(request, post_id):
     is_form_edit = True
     post = get_object_or_404(Post, id=post_id)
+    title = f'Редактирование поста'
     if post.author != request.user:
         return redirect('posts:post_detail', post_id)
-    else:
-        form = PostForm(request.POST or None, instance=post)
-        if form.is_valid():
-            post = form.save()
-            return redirect('posts:post_detail', post_id)
-        form = PostForm(instance=post)
 
-        return render(request, 'posts/post_create.html',
-                      context={'form': form,
-                               'is_form_edit': is_form_edit,
-                               'post': post})
+    form = PostForm(request.POST or None, instance=post)
+    if form.is_valid():
+        post = form.save()
+        return redirect('posts:post_detail', post_id)
+
+    return render(request, 'posts/post_create.html',
+                  context={'form': form,
+                           'is_form_edit': is_form_edit,
+                           'post': post,
+                           'title': title})

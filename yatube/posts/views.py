@@ -65,7 +65,7 @@ def post_detail(request, post_id):
 @login_required
 def post_create(request):
     form = PostForm(request.POST or None)
-    title = f'Новый пост'
+    title = 'Новый пост'
     if form.is_valid():
         form.instance.author = request.user
         form.save()
@@ -78,7 +78,7 @@ def post_create(request):
 def post_edit(request, post_id):
     is_form_edit = True
     post = get_object_or_404(Post, id=post_id)
-    title = f'Редактирование поста'
+    title = 'Редактирование поста'
     if post.author != request.user:
         return redirect('posts:post_detail', post_id)
 
